@@ -29,6 +29,18 @@ class MyController(Controller):
 
 
 def main(args):
+    logger = logging.getLogger(args.infile.name.replace('/', '').strip('.'))
+    logger.setLevel(logging.INFO)
+    formatter = logging.formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    file_handler = logging.StreamHandler(args.logfile)
+    file_handler.setLevel(logging.INFO)
+    file_handler.setFormatter(formatter)
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.DEBUG)
+    console_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
+
     c = MyController(
         jobs=({'cmd': l.strip()} for l in args.infile),
         global_params={'outfile': args.outfile},
