@@ -1,0 +1,3 @@
+[submodule "multiworkers"]
+	path = multiworkers
+	url = git://github.com/agrimaldi/multiworkers.git
