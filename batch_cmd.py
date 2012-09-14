@@ -14,8 +14,15 @@ class MyWorker(Worker):
     def __init__(self, *args, **kwargs):
         Worker.__init__(self, *args, **kwargs)
 
+    def log(self, result):
+        if result[1] == 0:
+            self.global_params['logger'].info(result[1])
+        else:
+            self.global_params['logger'].error(result[1])
+
     def do(self, job):
         oc = os.system(job['cmd'])
+        self.log((job['cmd'], oc))
         return {'oc': oc}
 
 
