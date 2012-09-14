@@ -4,6 +4,7 @@
 import os
 import sys
 import argparse
+import logging
 import multiprocessing
 from multiworkers.multiworker import Controller, Worker
 
@@ -64,5 +65,11 @@ if __name__ == '__main__':
         action='store_true',
         default=False,
         help='No progress bar'
+    )
+    parser.add_argument(
+        '-l', '--logfile', dest='logfile',
+        type=argparse.FileType('w'),
+        default=sys.stderr,
+        help='File to use for logging'
     )
     main(parser.parse_args())
