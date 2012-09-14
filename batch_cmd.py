@@ -6,6 +6,7 @@ import sys
 import argparse
 import logging
 import multiprocessing
+import time
 from multiworkers.multiworker import Controller, Worker
 
 
@@ -66,10 +67,17 @@ if __name__ == '__main__':
         default=False,
         help='No progress bar'
     )
+    args = parser.parse_args()
+    timestamp = time.strftime("%Y%m%d.%H%M%S", time.localtime())
+    if args.infile.name == '<stdin>':
+        default_logfile = '-'.join(['LOG', timestamp])
+    else:
+        default_logfile = '-'.join(['LOG', args.infile.name, timestamp])
+    print default_logfile
     parser.add_argument(
         '-l', '--logfile', dest='logfile',
         type=argparse.FileType('w'),
-        default=sys.stderr,
+        default=default_logfile,
         help='File to use for logging'
     )
     main(parser.parse_args())
