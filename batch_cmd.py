@@ -61,6 +61,7 @@ def main(args):
     )
     c.start()
 
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -94,7 +95,7 @@ if __name__ == '__main__':
     if args.infile.name == '<stdin>':
         default_logfile = '-'.join(['LOG', timestamp])
     else:
-        default_logfile = '-'.join(['LOG', args.infile.name, timestamp])
+        default_logfile = '-'.join(['LOG', args.infile.name])
     parser.add_argument(
         '-l', '--logfile', dest='logfile',
         type=argparse.FileType('w'),
