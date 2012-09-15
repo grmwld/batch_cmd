@@ -150,7 +150,7 @@ def main(args):
         num_cpu=args.num_cpu,
         quiet=args.quiet,
         worker_class=MyWorker,
-        debug=False
+        debug=args.debug
     )
     c.start()
 
@@ -182,6 +182,12 @@ if __name__ == '__main__':
         action='store_true',
         default=False,
         help='No progress bar'
+    )
+    parser.add_argument(
+        '-d', '--debug', dest='debug',
+        action='store_true',
+        default=False,
+        help='Debug mode'
     )
     args = parser.parse_args()
     timestamp = time.strftime("%Y%m%d.%H%M%S", time.localtime())
