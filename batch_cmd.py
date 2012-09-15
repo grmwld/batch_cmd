@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-import os
 import sys
 import argparse
 import logging
 import multiprocessing
+import subprocess
 import Queue
 import time
 from multiworkers.multiworker import Controller, Worker
@@ -30,15 +30,31 @@ class MyWorker(Worker):
         Worker.__init__(self, *args, **kwargs)
 
     def log(self, result):
-        if result[1] == 0:
-            self.global_params['logger'].info(result[0])
+        if result['retcode'] == 0:
+            self.global_params['logger'].info(result['cmd'])
         else:
-            self.global_params['logger'].error(result[0])
+            self.global_params['logger'].error(''.join([
+                result['cmd'], ' - ',
+                result['stdout'] + ' - ' if result['stdout'] else '',
+                result['stderr'] if result['stderr'] else ''
+            ]))
 
     def do(self, job):
-        oc = os.system(job['cmd'])
-        self.log((job['cmd'], oc))
-        return {'oc': oc}
+        proc = subprocess.Popen(
+            job['cmd'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            shell=True
+        )
+        stdout_data, stderr_data = (o.strip() for o in proc.communicate())
+        result = {
+            'cmd': job['cmd'],
+            'stdout': stdout_data,
+            'stderr': stderr_data,
+            'retcode': proc.returncode
+        }
+        self.log(result)
+        return {'result': result}
 
 
 class MyController(Controller):
