@@ -135,8 +135,10 @@ class MyController(Controller):
         return self.progress_premessage
 
     def finish(self):
-        output = ', '.join(map(str, [c['oc'] for c in self.results]))
-        print >>self.global_params['outfile'], output
+        successful = len(self.results) - len(self.error_logs)
+        final_output = '%(s)s / %(t)s jobs completed sucessfuly'\
+                % {'s': successful, 't':str(len(self.results))}
+        print >>self.global_params['outfile'], final_output
 
 
 def main(args):
