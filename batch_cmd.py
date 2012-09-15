@@ -10,6 +10,44 @@ import Queue
 import time
 from multiworkers.multiworker import Controller, Worker
 
+BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
+
+RESET_SEQ = "\033[0m"
+COLOR_SEQ = "\033[1;%dm"
+BOLD_SEQ = "\033[1m"
+
+COLORS = {
+    'WARNING': YELLOW,
+    'INFO': WHITE,
+    'DEBUG': BLUE,
+    'CRITICAL': MAGENTA,
+    'ERROR': RED,
+    'RED': RED,
+    'GREEN': GREEN,
+    'YELLOW': YELLOW,
+    'BLUE': BLUE,
+    'MAGENTA': MAGENTA,
+    'CYAN': CYAN,
+    'WHITE': WHITE,
+}
+
+class ColoredConsoleFormatter(logging.Formatter):
+    def __init__(self, *args, **kwargs):
+        logging.Formatter.__init__(self, *args, **kwargs)
+
+    def format(self, record):
+        levelname = record.levelname
+        color = COLOR_SEQ % (30 + COLORS[levelname])
+        message = logging.Formatter.format(self, record)
+        message = message.replace("$RESET", RESET_SEQ)\
+                         .replace("$BOLD",  BOLD_SEQ)\
+                         .replace("$COLOR", color)
+        for k, v in COLORS.items():
+            message = message.replace("$" + k, COLOR_SEQ % (v + 30))\
+                             .replace("$BG" + k, COLOR_SEQ % (v + 40))\
+                             .replace("$BG-" + k, COLOR_SEQ % (v + 40))
+        return message + RESET_SEQ
+
 
 class QueueHandler(logging.Handler):
     def __init__(self, queue):
@@ -34,9 +72,9 @@ class MyWorker(Worker):
             self.global_params['logger'].info(result['cmd'])
         else:
             self.global_params['logger'].error(''.join([
-                result['cmd'], ' - ',
-                result['stdout'] + ' - ' if result['stdout'] else '',
-                result['stderr'] if result['stderr'] else ''
+                '$MAGENTAcommand$RESET: ' + result['cmd'] + '\n\t',
+                ('$MAGENTAstdout:$RESET ' + result['stdout'] + '\n\t') if result['stdout'] else '',
+                ('$MAGENTAstderr:$RESET ' + result['stderr'] + '\n\t') if result['stderr'] else ''
             ]))
 
     def do(self, job):
@@ -66,15 +104,20 @@ class MyController(Controller):
             self.global_params['infile'].name.replace('/', '').strip('.')
         )
         logger.setLevel(logging.INFO)
-        formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        file_formatter = logging.Formatter(
+            "%(levelname)s - %(asctime)s - %(name)s - %(message)s",
+            "%Y-%m-%d %H:%M:%S"
+        )
+        colored_console_formatter = ColoredConsoleFormatter(
+            "$COLOR%(levelname)s$RESET - %(asctime)s - $BOLD$CYAN%(name)s$RESET \n\t%(message)s",
+            "%Y-%m-%d %H:%M:%S"
         )
         file_handler = logging.StreamHandler(self.global_params['logfile'])
         file_handler.setLevel(logging.INFO)
-        file_handler.setFormatter(formatter)
+        file_handler.setFormatter(file_formatter)
         console_handler = QueueHandler(self.global_params['error_logs_queue'])
         console_handler.setLevel(logging.ERROR)
-        console_handler.setFormatter(formatter)
+        console_handler.setFormatter(colored_console_formatter)
         logger.addHandler(file_handler)
         logger.addHandler(console_handler)
         self.global_params['logger'] = logger
