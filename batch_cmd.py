@@ -130,12 +130,9 @@ class MyController(Controller):
             except Queue.Empty:
                 return self.error_logs
 
-    def update_progress_message(self):
-        msg = '\n\n'.join([
-            Controller.update_progress_message(self).rstrip(),
-            '\n'.join(self.update_error_logs())
-        ])
-        return msg
+    def update_progress_premessage(self):
+        self.progress_premessage =  '\n' + '\n'.join(self.update_error_logs())
+        return self.progress_premessage
 
     def finish(self):
         output = ', '.join(map(str, [c['oc'] for c in self.results]))
