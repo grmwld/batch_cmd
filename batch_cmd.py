@@ -16,9 +16,9 @@ class MyWorker(Worker):
 
     def log(self, result):
         if result[1] == 0:
-            self.global_params['logger'].info(result[1])
+            self.global_params['logger'].info(result[0])
         else:
-            self.global_params['logger'].error(result[1])
+            self.global_params['logger'].error(result[0])
 
     def do(self, job):
         oc = os.system(job['cmd'])
