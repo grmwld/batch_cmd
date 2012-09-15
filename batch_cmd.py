@@ -17,7 +17,12 @@ class QueueHandler(logging.Handler):
         self.queue = queue
 
     def emit(self, record):
-        self.queue.put(record)
+        try:
+            self.queue.put(self.format(record))
+        except (KeyboardInterrupt, SystemExit):
+            raise
+        except:
+            self.handleError(record)
 
 
 class MyWorker(Worker):
@@ -61,9 +66,8 @@ class MyController(Controller):
     def update_error_logs(self):
         while True:
             try:
-                self.error_logs.append(
-                    str(self.global_params['error_logs_queue'].get_nowait())
-                )
+                record = self.global_params['error_logs_queue'].get_nowait()
+                self.error_logs.append(record)
             except Queue.Empty:
                 return self.error_logs
 
