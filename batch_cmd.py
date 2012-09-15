@@ -72,9 +72,9 @@ class MyWorker(Worker):
             self.global_params['logger'].info(result['cmd'])
         else:
             self.global_params['logger'].error(''.join([
-                result['cmd'], ' - ',
-                result['stdout'] + ' - ' if result['stdout'] else '',
-                result['stderr'] if result['stderr'] else ''
+                '$MAGENTAcommand$RESET: ' + result['cmd'] + '\n\t',
+                ('$MAGENTAstdout:$RESET ' + result['stdout'] + '\n\t') if result['stdout'] else '',
+                ('$MAGENTAstderr:$RESET ' + result['stderr'] + '\n\t') if result['stderr'] else ''
             ]))
 
     def do(self, job):
@@ -105,10 +105,12 @@ class MyController(Controller):
         )
         logger.setLevel(logging.INFO)
         file_formatter = logging.Formatter(
-            "%(levelname)s - %(asctime)s - %(name)s - %(message)s"
+            "%(levelname)s - %(asctime)s - %(name)s - %(message)s",
+            "%Y-%m-%d %H:%M:%S"
         )
         colored_console_formatter = ColoredConsoleFormatter(
-            "$COLOR%(levelname)s$RESET - %(asctime)s - $BOLD$CYAN%(name)s$RESET - %(message)s"
+            "$COLOR%(levelname)s$RESET - %(asctime)s - $BOLD$CYAN%(name)s$RESET \n\t%(message)s",
+            "%Y-%m-%d %H:%M:%S"
         )
         file_handler = logging.StreamHandler(self.global_params['logfile'])
         file_handler.setLevel(logging.INFO)
